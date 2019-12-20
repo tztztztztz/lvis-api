@@ -20,7 +20,7 @@ class LVISEval:
             or list of dict)
             iou_type (str): segm or bbox evaluation
         """
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('global')
 
         if iou_type not in ["bbox", "segm"]:
             raise ValueError("iou_type: {} is not supported.".format(iou_type))
@@ -88,6 +88,9 @@ class LVISEval:
         img_data = self.lvis_gt.load_imgs(ids=self.params.img_ids)
         # per image map of categories not present in image
         img_nl = {d["id"]: d["neg_category_ids"] for d in img_data}
+        #_all_neg_inds = [i+1 for i in range(1230)]
+        #img_nl = {d["id"]: _all_neg_inds for d in img_data}
+
         # per image list of categories present in image
         img_pl = defaultdict(set)
         for ann in gts:
@@ -436,7 +439,11 @@ class LVISEval:
             if iou_thr is not None:
                 tidx = np.where(iou_thr == self.params.iou_thrs)[0]
                 s = s[tidx]
-            s = s[:, :, aidx]
+            if freq_group_idx is not None:
+                s = s[:, self.freq_groups[freq_group_idx], aidx]
+            else:
+                s = s[:, :, aidx]
+            #s = s[:, :, aidx]
 
         if len(s[s > -1]) == 0:
             mean_s = -1
@@ -467,6 +474,10 @@ class LVISEval:
         for area_rng in ["small", "medium", "large"]:
             key = "AR{}@{}".format(area_rng[0], max_dets)
             self.results[key] = self._summarize('ar', area_rng=area_rng)
+
+        self.results["ARr"] = self._summarize('ar', freq_group_idx=0)
+        self.results["ARc"] = self._summarize('ar', freq_group_idx=1)
+        self.results['ARf'] = self._summarize('ar', freq_group_idx=2)
 
     def run(self):
         """Wrapper function which calculates the results."""

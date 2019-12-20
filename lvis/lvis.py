@@ -21,8 +21,8 @@ class LVIS:
         Args:
             annotation_path (str): location of annotation file
         """
-        self.logger = logging.getLogger(__name__)
-        self.logger.info("Loading annotations.")
+       # self.logger = logging.getLogger('global')
+       # self.logger.info("Loading annotations.")
 
         self.dataset = self._load_json(annotation_path)
 
@@ -36,7 +36,8 @@ class LVIS:
             return json.load(f)
 
     def _create_index(self):
-        self.logger.info("Creating index.")
+        #self.logger.info("Creating index.")
+        print("Creating index.")
 
         self.img_ann_map = defaultdict(list)
         self.cat_img_map = defaultdict(list)
@@ -58,7 +59,8 @@ class LVIS:
         for ann in self.dataset["annotations"]:
             self.cat_img_map[ann["category_id"]].append(ann["image_id"])
 
-        self.logger.info("Index created.")
+        #self.logger.info("Index created.")
+        print("Index created.")
 
     def get_ann_ids(self, img_ids=None, cat_ids=None, area_rng=None):
         """Get ann ids that satisfy given filter conditions.
